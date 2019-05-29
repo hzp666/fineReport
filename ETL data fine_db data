@@ -1,0 +1,36 @@
+import pymysql
+
+# create the connection
+db1 = pymysql.connect('localhost', 'root', '123456', 'fine_db')
+db2 = pymysql.connect('localhost', 'root', '123456', 'tianma_bi')
+
+# create a cursor
+cursor1 = db1.cursor()
+cursor2 = db2.cursor()
+
+get_sql = '''
+show tables;
+'''
+
+cursor1.execute(get_sql)
+
+table_data = cursor1.fetchall()
+for i in table_data:
+    truncate_sql = '''
+    
+    truncate table fine_db.%s;
+    
+    ''' % (i[0])
+    insert_sql = '''
+    insert into fine_db.%s 
+    select * from tianma_bi.%s;
+    ''' % (i[0], i[0])
+    cursor2.execute(truncate_sql)
+    cursor2.execute(insert_sql)
+    db2.commit()
+    print(i[0])
+
+cursor1.close()
+db1.close()
+cursor2.close()
+db2.close()
